@@ -1,0 +1,13 @@
+* DCM TIP4P test
+*
+
+BOMLEV -2
+
+set base     {{BASEPATH}}
+set input    {{INPUTPATH}}
+set datamin  @base/min
+set dataheq  @base/heq
+set dataeq   @base/eq
+set dataanal @base/anal
+
+

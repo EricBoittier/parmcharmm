@@ -1,0 +1,7 @@
+
+!
+! f-MDCM
+!
+open unit 10 card read name @input/10charges.fdcm
+! WITH FLUX
+DCM FLUX 11 IUDCM 10 TSHIFT !DIP 14 XYZ 15

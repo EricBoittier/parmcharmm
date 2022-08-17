@@ -1,0 +1,13 @@
+!
+! Setup PBC (Periodic Boundary Condition)
+!
+
+stream @input/step3_pbcsetup.str
+
+open read unit 10 card name @input/crystal_image.str
+CRYSTAL DEFINE @XTLtype @A @B @C @alpha @beta @gamma
+CRYSTAL READ UNIT 10 CARD
+
+
+!Image centering by residue
+IMAGE BYRESID XCEN @xcen YCEN @ycen ZCEN @zcen sele resname LIG end

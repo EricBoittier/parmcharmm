@@ -1,0 +1,34 @@
+
+!================================================================
+! g(r) calculation
+!================================================================
+set a ?XTLA
+set b ?XTLB
+set c ?XTLC
+
+open unit 20 unform read name @dataheq/md_heq.dcd
+open unit 21 unform read name @dataeq/md_eq1.dcd
+open unit 8 write form name  @dataanal/methanol.groo
+open unit 31 write form name @dataanal/methanol.msd
+open unit 32 write form name @dataanal/methanol.den
+
+!  compute MSD
+coordinate analysis solvent spec -
+select ( resname lig ) end fini -
+xref 0.0 yref 0.0 zref 0.0 -                      ! specifies solvent analysis around (xref, yref, zref), static site
+skip 1000 firstu 20 nunit 2  -                    ! trajectory specification SKIP 1000 (1000*0.001=1 ps)
+rDsp 9.4285 -                                     ! radius of dynamics sphere, used for densities, kirkwood and dbf
+rspin 0.0 rspout 999.9 -                          ! we are interested in ALL waters
+ncors 20 -                                        ! compute MSD to NCORS*SKIP steps
+mgn 100 dr 0.1 -                                  ! comp. g(r) at MGN points separated by DR
+rsph 999.9     -                                  ! we use ALL waters for RDF calculation
+imsd 31 iden 32 -                                 ! flag to do the solvent-solvent g(r), MSD, DENsity analysis
+ifmin xbox @a ybox @b zbox @c                     ! and we did use PBC, simple rectangular box
+                                                  ! if trajectory is from constant pressure simulation
+                                                  ! actual box size is taken from trajectory
+                                                  ! NSAVC 1000 i.e. @1 ps traj. was saved. For water to get
+                                                  ! a good estimate of Dtransl for the 1-20 ps part of MSD(t)
+
+
+STOP
+

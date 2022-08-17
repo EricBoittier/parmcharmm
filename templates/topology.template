@@ -1,0 +1,72 @@
+read rtf card
+* methanol
+*
+31 1
+
+MASS  1  CG331     12.01100 ! aliphatic C for methyl group (-CH3)
+MASS  2  HGP1       1.00800 ! polar H
+MASS  3  HGA3       1.00800 ! alphatic proton, CH3
+MASS  4  OG311     15.99940 ! hydroxyl oxygen
+
+
+RESI lig            0.000 ! param penalty=   0.000 ; charge penalty=   0.000
+GROUP            ! CHARGE   CH_PENALTY
+ATOM O      OG311  -0.650 !    0.000
+ATOM C      CG331  -0.040 !    0.000
+ATOM H1     HGP1    0.420 !    0.000
+ATOM H2     HGA3    0.090 !    0.000
+ATOM H3     HGA3    0.090 !    0.000
+ATOM H4     HGA3    0.090 !    0.000
+
+BOND C    O
+BOND O    H1
+BOND C    H4
+BOND C    H3
+BOND C    H2
+
+PATC  FIRS NONE LAST NONE
+
+END
+
+
+read parameter card
+* methanol
+*
+ATOMS
+MASS  1  CG331     12.01100 ! aliphatic C for methyl group (-CH3)
+MASS  2  HGP1       1.00800 ! polar H
+MASS  3  HGA3       1.00800 ! alphatic proton, CH3
+MASS  4  OG311     15.99940 ! hydroxyl oxygen
+
+BOND
+CG331  OG311  428.0     1.420
+CG331  HGA3   322.0     1.111
+OG311  HGP1   545.0     0.960
+
+ANGLES
+OG311  CG331 HGA3 45.90  108.8900
+HGA3   CG331 HGA3 35.50  108.4000
+CG331  OG311 HGP1 57.50  106.0000
+
+DIHEDRALS
+HGA3 CG331 OG311 HGP1     0.18        3     0.0000
+
+NONBONDED nbxmod  5 atom cdiel fshift vatom vdistance vfswitch -
+cutnb 14.0 ctofnb 12.0 ctonnb 10.0 eps 1.0 e14fac 1.0 wmin 1.5
+! scaled by a factor of {{scale}}
+OG311    0.0       {{OG311_e}}   {{OG311_S}}                  ! og MeOH and EtOH 1/06 (was -0.1521 1.7682)
+CG331    0.0       {{CG331_e}}   {{CG331_S}}   0.0 -0.01 1.9 ! alkane (CT3), 4/98, yin, adm jr; Rmin/2 modified from 2.04 to 2.05
+HGP1     0.0       {{HGP1_e}}    {{HGP1_S}}                 ! polar H
+HGA3     0.0       {{HGA3_e}}    {{HGA3_S}}                 ! alkane, yin and mackerell, 4/98
+
+HBOND CUTHB 0.5
+END
+
+! Read PSF
+open read unit 10 card name @input/step1_pdbreader.psf
+read psf  unit 10 card
+!Read Coordinate
+open read unit 10 card name @input/step1_pdbreader.crd
+read coor unit 10 card
+close unit 10
+!print coor

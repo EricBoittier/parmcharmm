@@ -1,0 +1,88 @@
+
+
+!  loaded from sim1.template
+FASTER ON
+SHAKE BOND BONH TOL 1.0E-8
+
+!================================================================
+!non bonded cut-offs
+!================================================================
+! NBOND CUTNB @ctl CUTIM @ctl CTOFnb @rc CTONnb @ci -
+!       atom vatom vdistance                        -
+!     VSWITCH  SHIFT CDIE eps 1.0  e14fac 1.0  wmin 1.5
+
+ENERGY
+
+!================================================================
+! Minimize
+!================================================================
+ MINI SD NSTEP 500
+
+
+!================================================================
+! Write psf, crd and pdb file
+!================================================================
+WRITE PSF CARD NAME @datamin/int.psf
+* PSF
+*
+
+WRITE COOR CARD NAME @datamin/int.crd
+* CRD
+*
+
+WRITE COOR PDB NAME @datamin/int.pdb
+* PDB
+*
+
+!================================================================
+! Heat the system
+!================================================================
+OPEN WRITE UNIT 31 CARD NAME @dataheq/md_heq.res      ! Restart file
+OPEN WRITE UNIT 32 FILE NAME @dataheq/md_heq.dcd      ! Coordinates file
+
+dyna cpt start nstep {{NSTEP1}} timestep 0.001     -
+    pcons pint pref 1.0 pmass 2000. pgamma 25. -
+    INBFRQ -1 IMGFRQ -1                        -
+    nprint 100 iprfrq 5000 ihtfrq 1000 ieqfrq 1000 ntrfrq 1000 -
+    firstt  98.15 finalt {{TEMP}} teminc 10.0  tbath {{TEMP}} -
+    iasors 1 iasvel 1 iscvel 0 ichecw 1 twindh 5.0 twindl -5.0 -
+    IUNWRITE 31 IUNCRD 32 NSAVC 1000
+
+!================================================================
+! Write psf, crd and pdb file
+!================================================================
+WRITE COOR CARD NAME @dataheq/md_heq.crd
+* CRD
+*
+
+WRITE COOR PDB NAME @dataheq/md_heq.pdb
+* PDB
+*
+
+!================================================================
+! Equilibration with a thermostat
+!================================================================
+OPEN READ  UNIT 30 CARD NAME @dataheq/md_heq.res       ! Restart file
+OPEN WRITE UNIT 31 CARD NAME @dataeq/md_eq1.res        ! Restart file
+OPEN WRITE UNIT 32 FILE NAME @dataeq/md_eq1.dcd        ! Coordinates file
+
+dyna cpt rest nstep {{NSTEP2}} timestep 0.001  -
+    pcons pint pref 1.0 pmass 2000. pgamma 5.0 -
+    hoover reft {{TEMP}} tmass 10000. -
+    INBFRQ -1 IMGFRQ -1                        -
+    nprint 100 iprfrq 5000 ihtfrq 0 ieqfrq 0 ntrfrq 5000 -
+    firstt {{TEMP}} finalt {{TEMP}} teminc 10.0 tstruct {{TEMP}}  tbath {{TEMP}}  -
+    iasors 1 iasvel 1 iscvel 0 ichecw 0 twindh 5.0 twindl -5.0 -
+    IUNREAD 30 IUNWRITE 31 IUNCRD 32 NSAVC 1000
+
+!================================================================
+! Write psf, crd and pdb file
+!================================================================
+WRITE COOR CARD NAME @dataeq/md_eq1.crd
+* CRD
+*
+
+WRITE COOR PDB NAME @dataeq/md_eq1.pdb
+* PDB
+*
+

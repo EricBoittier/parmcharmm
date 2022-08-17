@@ -1,0 +1,2 @@
+head.template = BASEPATH #  base path
+sim1.template = TEMP #  temperature
