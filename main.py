@@ -5,9 +5,9 @@ from pathlib import Path
 import sys
 
 # temperatures = [240.0, 260.0, 280.0, 290.0, 300.0, 310.0, 320.0, 340.0]
-temperatures = [245.0, 298.15, 310.0]
-NSTEP1 =  100000
-NSTEP2 = 1000000
+temperatures = [245.0, 270.0, 298.15, 310.0]
+NSTEP1 = 100000
+NSTEP2 = 2000000
 
 #  methanol
 LJ_dict = {"OG311": [-0.1921, 1.7650],
@@ -25,16 +25,24 @@ charmm_sub_dirs = ["min", "heq", "eq", "anal"]
 # templates
 HEADER_TEMPLATE_STR = open(os.path.join("templates", "head.template")).read()
 HEADER_TEMPLATE = jinja2.Template(HEADER_TEMPLATE_STR, undefined=StrictUndefined)
+
 TOP_TEMPLATE_STR = open(os.path.join("templates", "topology.template")).read()
 TOP_TEMPLATE = jinja2.Template(TOP_TEMPLATE_STR, undefined=StrictUndefined)
+TOP_TEMPLATE2_STR = open(os.path.join("templates", "topology2.template")).read()
+TOP_TEMPLATE2 = jinja2.Template(TOP_TEMPLATE2_STR, undefined=StrictUndefined)
+
 CRYSTAL_TEMPLATE_STR = open(os.path.join("templates", "crystal.template")).read()
 CRYSTAL_TEMPLATE = jinja2.Template(CRYSTAL_TEMPLATE_STR, undefined=StrictUndefined)
 DCM_TEMPLATE_STR = open(os.path.join("templates", "mdcm.template")).read()
 DCM_TEMPLATE = jinja2.Template(DCM_TEMPLATE_STR, undefined=StrictUndefined)
 FDCM_TEMPLATE_STR = open(os.path.join("templates", "fdcm.template")).read()
 FDCM_TEMPLATE = jinja2.Template(FDCM_TEMPLATE_STR, undefined=StrictUndefined)
+
 SIM1_TEMPLATE_STR = open(os.path.join("templates", "sim1.template")).read()
 SIM1_TEMPLATE = jinja2.Template(SIM1_TEMPLATE_STR, undefined=StrictUndefined)
+SIM2_TEMPLATE_STR = open(os.path.join("templates", "sim2.template")).read()
+SIM2_TEMPLATE = jinja2.Template(SIM2_TEMPLATE_STR, undefined=StrictUndefined)
+
 JOB_TEMPLATE_STR = open(os.path.join("templates", "job.template")).read()
 JOB_TEMPLATE = jinja2.Template(JOB_TEMPLATE_STR, undefined=StrictUndefined)
 ANALYSIS_TEMPLATE_STR = open(os.path.join("templates", "analysis.template")).read()
@@ -88,15 +96,30 @@ def make_directories(BASE, INPUT, TEMPS, scale, NPROC=16, fmdcm=False, mdcm=Fals
         slurm_file_path = os.path.join(subdir, "job.sh")
         with open(slurm_file_path, "w") as f:
             f.write(JOB_TEMPLATE.render(NPROC=NPROC, NAME="test"))
-        f.close()
 
         #  add directories for heat, eq, anal, etc.
         for sub in charmm_sub_dirs:
             subdirpath = os.path.join(subdir, sub)
             safe_mkdir(subdirpath)
 
+        #  make gas phase simulation
+        gas_phase_dir = os.path.join(subdir, "gas")
+        safe_mkdir(gas_phase_dir)
 
-def format_topology(scale):
+        slurm_file_path = os.path.join(gas_phase_dir, "job.sh")
+        with open(slurm_file_path, "w") as f:
+            f.write(JOB_TEMPLATE.render(NPROC=1, NAME="gas"))
+
+        gas_phase_chm_file = os.path.join(gas_phase_dir, "job.inp")
+        with open(gas_phase_chm_file, "w") as f:
+            f.write(make_charm_input_gasphase(temperature, gas_phase_dir, INPUT, scale, fmdcm=fmdcm, mdcm=mdcm))
+
+        for sub in charmm_sub_dirs:
+            subdirpath = os.path.join(gas_phase_dir, sub)
+            safe_mkdir(subdirpath)
+
+
+def format_topology(scale, TEMPLATE):
     # S = 1.5 to 2.2, e = 0 to -0.5
     # S_scale = scale
     # e_scale = scale
@@ -110,15 +133,15 @@ def format_topology(scale):
     HGA3_e = "{:.3f}".format(LJ_dict["HGA3"][0] * scale)
     HGA3_S = "{:.3f}".format(LJ_dict["HGA3"][1] * scale)
 
-    _ = TOP_TEMPLATE.render(OG311_e=OG311_e,
-                            OG311_S=OG311_S,
-                            CG331_e=CG331_e,
-                            CG331_S=CG331_S,
-                            HGP1_e=HGP1_e,
-                            HGP1_S=HGP1_S,
-                            HGA3_e=HGA3_e,
-                            HGA3_S=HGA3_S,
-                            scale=scale)
+    _ = TEMPLATE.render(OG311_e=OG311_e,
+                        OG311_S=OG311_S,
+                        CG331_e=CG331_e,
+                        CG331_S=CG331_S,
+                        HGP1_e=HGP1_e,
+                        HGP1_S=HGP1_S,
+                        HGA3_e=HGA3_e,
+                        HGA3_S=HGA3_S,
+                        scale=scale)
     return _
 
 
@@ -127,21 +150,35 @@ def make_charmm_input(temperature, basepath, inputpath, scale, fmdcm=False, mdcm
     # header
     output += HEADER_TEMPLATE.render(BASEPATH=basepath, INPUTPATH=inputpath)
     # topology
-    output += format_topology(scale)
-
+    output += format_topology(scale, TOP_TEMPLATE)
     # crystal
     output += CRYSTAL_TEMPLATE.render()
+    #  if using advanced charge models
+    if fmdcm:
+        output += FDCM_TEMPLATE_STR
+    if mdcm:
+        output += DCM_TEMPLATE_STR
+    # simulation
+    output += SIM1_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
+    output += ANALYSIS_TEMPLATE_STR
+
+    return output
+
+
+def make_charm_input_gasphase(temperature, basepath, inputpath, scale, fmdcm=False, mdcm=False):
+    output = ""
+    # header
+    output += HEADER_TEMPLATE.render(BASEPATH=basepath, INPUTPATH=inputpath)
+    # topology
+    output += format_topology(scale, TOP_TEMPLATE2)
 
     #  if using advanced charge models
     if fmdcm:
         output += FDCM_TEMPLATE_STR
     if mdcm:
         output += DCM_TEMPLATE_STR
-
     # simulation
-    output += SIM1_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
-
-    output += ANALYSIS_TEMPLATE_STR
+    output += SIM2_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
 
     return output
 

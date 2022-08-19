@@ -40,13 +40,13 @@ WRITE COOR PDB NAME @datamin/int.pdb
 OPEN WRITE UNIT 31 CARD NAME @dataheq/md_heq.res      ! Restart file
 OPEN WRITE UNIT 32 FILE NAME @dataheq/md_heq.dcd      ! Coordinates file
 
-dyna cpt start nstep {{NSTEP1}} timestep 0.001     -
-    pcons pint pref 1.0 pmass 2000. pgamma 25. -
-    INBFRQ -1 IMGFRQ -1                        -
-    nprint 100 iprfrq 5000 ihtfrq 1000 ieqfrq 1000 ntrfrq 1000 -
-    firstt  98.15 finalt {{TEMP}} teminc 10.0  tbath {{TEMP}} -
-    iasors 1 iasvel 1 iscvel 0 ichecw 1 twindh 5.0 twindl -5.0 -
-    IUNWRITE 31 IUNCRD 32 NSAVC 1000
+
+DYNA VVER start timestep 0.001 nstep {{NSTEP1}}  -
+     nprint 1000 iprfrq 1000 ntrfrq 1000 -
+     iunread -1 iunwri 31 iuncrd 32 iunvel -1 kunit -1 -
+     nsavc 1000 nsavv 0 -
+     nose rstn tref {{TEMP}} qref 50 ncyc 10 firstt 98.15
+
 
 !================================================================
 ! Write psf, crd and pdb file
@@ -66,14 +66,14 @@ OPEN READ  UNIT 30 CARD NAME @dataheq/md_heq.res       ! Restart file
 OPEN WRITE UNIT 31 CARD NAME @dataeq/md_eq1.res        ! Restart file
 OPEN WRITE UNIT 32 FILE NAME @dataeq/md_eq1.dcd        ! Coordinates file
 
-dyna cpt rest nstep {{NSTEP2}} timestep 0.001  -
-    pcons pint pref 1.0 pmass 2000. pgamma 5.0 -
-    hoover reft {{TEMP}} tmass 10000. -
-    INBFRQ -1 IMGFRQ -1                        -
-    nprint 100 iprfrq 5000 ihtfrq 0 ieqfrq 0 ntrfrq 5000 -
-    firstt {{TEMP}} finalt {{TEMP}} teminc 10.0 tstruct {{TEMP}}  tbath {{TEMP}}  -
-    iasors 1 iasvel 1 iscvel 0 ichecw 0 twindh 5.0 twindl -5.0 -
-    IUNREAD 30 IUNWRITE 31 IUNCRD 32 NSAVC 1000
+
+DYNA VVER restart timestep 0.001 nstep {{NSTEP2}} -
+     nprint 1000 iprfrq 1000 ntrfrq 1000 -
+     iunread 30 iunwri 31 iuncrd 32 iunvel -1 kunit -1 -
+     nsavc 1000 nsavv 0 -
+     nose tref {{TEMP}}  qref 50 ncyc 10 firstt {{TEMP}}
+
+
 
 !================================================================
 ! Write psf, crd and pdb file
