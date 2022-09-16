@@ -5,9 +5,9 @@ from pathlib import Path
 import sys
 
 # temperatures = [240.0, 260.0, 280.0, 290.0, 300.0, 310.0, 320.0, 340.0]
-temperatures = [245.0, 270.0, 298.15, 310.0]
+temperatures = [250.0, 270.0, 298.15, 331.0]
 NSTEP1 = 100000
-NSTEP2 = 2000000
+NSTEP2 = 1000000
 
 #  methanol
 LJ_dict = {"OG311": [-0.1921, 1.7650],
@@ -66,7 +66,7 @@ def safe_mkdir(path):
 """
 
 
-def make_directories(BASE, INPUT, TEMPS, scale, NPROC=16, fmdcm=False, mdcm=False):
+def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False):
     if scale is None:
         scale = 1
 
@@ -89,7 +89,7 @@ def make_directories(BASE, INPUT, TEMPS, scale, NPROC=16, fmdcm=False, mdcm=Fals
         #  charmm input
         charm_file_path = os.path.join(subdir, "job.inp")
         with open(charm_file_path, "w") as f:
-            f.write(make_charmm_input(temperature, subdir, INPUT, scale, fmdcm=fmdcm, mdcm=mdcm))
+            f.write(make_charmm_input(temperature, subdir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm))
         f.close()
 
         #  sbatch script
@@ -112,25 +112,22 @@ def make_directories(BASE, INPUT, TEMPS, scale, NPROC=16, fmdcm=False, mdcm=Fals
 
         gas_phase_chm_file = os.path.join(gas_phase_dir, "job.inp")
         with open(gas_phase_chm_file, "w") as f:
-            f.write(make_charm_input_gasphase(temperature, gas_phase_dir, INPUT, scale, fmdcm=fmdcm, mdcm=mdcm))
+            f.write(make_charm_input_gasphase(temperature, gas_phase_dir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm))
 
         for sub in charmm_sub_dirs:
             subdirpath = os.path.join(gas_phase_dir, sub)
             safe_mkdir(subdirpath)
 
 
-def format_topology(scale, TEMPLATE):
-    # S = 1.5 to 2.2, e = 0 to -0.5
-    # S_scale = scale
-    # e_scale = scale
+def format_topology(scale, TEMPLATE, e_scale):
     """scale the LJ params in the topology"""
-    OG311_e = "{:.3f}".format(LJ_dict["OG311"][0] * scale)
+    OG311_e = "{:.3f}".format(LJ_dict["OG311"][0] * e_scale[0])
     OG311_S = "{:.3f}".format(LJ_dict["OG311"][1] * scale)
-    CG331_e = "{:.3f}".format(LJ_dict["CG331"][0] * scale)
+    CG331_e = "{:.3f}".format(LJ_dict["CG331"][0] * e_scale[1])
     CG331_S = "{:.3f}".format(LJ_dict["CG331"][1] * scale)
-    HGP1_e = "{:.3f}".format(LJ_dict["HGP1"][0] * scale)
+    HGP1_e = "{:.3f}".format(LJ_dict["HGP1"][0] * e_scale[2])
     HGP1_S = "{:.3f}".format(LJ_dict["HGP1"][1] * scale)
-    HGA3_e = "{:.3f}".format(LJ_dict["HGA3"][0] * scale)
+    HGA3_e = "{:.3f}".format(LJ_dict["HGA3"][0] * e_scale[3])
     HGA3_S = "{:.3f}".format(LJ_dict["HGA3"][1] * scale)
 
     _ = TEMPLATE.render(OG311_e=OG311_e,
@@ -145,12 +142,12 @@ def format_topology(scale, TEMPLATE):
     return _
 
 
-def make_charmm_input(temperature, basepath, inputpath, scale, fmdcm=False, mdcm=False):
+def make_charmm_input(temperature, basepath, inputpath, scale, escale, fmdcm=False, mdcm=False):
     output = ""
     # header
     output += HEADER_TEMPLATE.render(BASEPATH=basepath, INPUTPATH=inputpath)
     # topology
-    output += format_topology(scale, TOP_TEMPLATE)
+    output += format_topology(scale, TOP_TEMPLATE, escale)
     # crystal
     output += CRYSTAL_TEMPLATE.render()
     #  if using advanced charge models
@@ -165,12 +162,12 @@ def make_charmm_input(temperature, basepath, inputpath, scale, fmdcm=False, mdcm
     return output
 
 
-def make_charm_input_gasphase(temperature, basepath, inputpath, scale, fmdcm=False, mdcm=False):
+def make_charm_input_gasphase(temperature, basepath, inputpath, scale, escale, fmdcm=False, mdcm=False):
     output = ""
     # header
     output += HEADER_TEMPLATE.render(BASEPATH=basepath, INPUTPATH=inputpath)
     # topology
-    output += format_topology(scale, TOP_TEMPLATE2)
+    output += format_topology(scale, TOP_TEMPLATE2, escale)
 
     #  if using advanced charge models
     if fmdcm:
@@ -178,34 +175,46 @@ def make_charm_input_gasphase(temperature, basepath, inputpath, scale, fmdcm=Fal
     if mdcm:
         output += DCM_TEMPLATE_STR
     # simulation
-    output += SIM2_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
+    output += SIM2_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2 * 2)
 
     return output
 
 
-def make_job(PATH):
-    pass
-
-
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Fiddle with the parameters until they give you what you want...')
+    parser.add_argument('-v', '--v', help='version of the code ("charmm", "fmdcm", "mdcm")', required=True)
+    parser.add_argument('-s', '--s', help='scale separation', required=True)
+    parser.add_argument('-p_in', '--p_in', help='scale separation', required=True)
+    parser.add_argument('-p_out', '--p_out', help='scale separation', required=True)
+    parser.add_argument('-e1', '--e1', help='e1', required=True)
+    parser.add_argument('-e2', '--e2', help='e2', required=True)
+    parser.add_argument('-e3', '--e3', help='e3', required=True)
+    parser.add_argument('-e4', '--e4', help='e4', required=True)
+    args = vars(parser.parse_args())
+
     arguments = sys.argv
-    path = arguments[1]
-    input_path = arguments[2]
-    scale = float(arguments[3])
-    dcm = False
+    path = args["p_out"]
+    input_path = args["p_in"]
+    scale = float(args["s"])
+    dcm = args["v"]
+    e1 = args["e1"]
+    e2 = args["e2"]
+    e3 = args["e3"]
+    e4 = args["e4"]
 
-    if len(arguments) > 4:
-        dcm = arguments[4]
+    e_scale = [float(_) for _ in [e1, e2, e3, e4]]
 
-    if not dcm:
+    if dcm == "charmm":
         print("generating standard CHARMM input")
-        make_directories(path, input_path, temperatures, scale)
+        make_directories(path, input_path, temperatures, scale, e_scale)
     elif dcm == "fmdcm":
         print("generating fMDCM input")
-        make_directories(path, input_path, temperatures, scale, fmdcm=True)
+        make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True)
     elif dcm == "mdcm":
         print("generating MDCM input")
-        make_directories(path, input_path, temperatures, scale, mdcm=True)
+        make_directories(path, input_path, temperatures, scale, e_scale, mdcm=True)
     else:
         print("incorrect input.")
         sys.exit(1)
