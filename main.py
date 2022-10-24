@@ -66,7 +66,7 @@ def safe_mkdir(path):
 """
 
 
-def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False):
+def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False, cluster="pc-beethoven"):
     if scale is None:
         scale = 1
 
@@ -78,6 +78,13 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
     runs_dir = os.path.join(BASE)
     # base directory
     safe_mkdir(BASE)
+
+
+    module = ""
+    if cluster == "pc-beethoven":
+        module = "module load charmm/c45a1-gcc9.2.0-ompi4.0.2"
+    elif cluster == "pc-nccr-cluster":
+        module = "module load charmm/gfortran-openmpi-1.10.4-hfi"
 
     # runs
     safe_mkdir(runs_dir)
@@ -95,7 +102,7 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
         #  sbatch script
         slurm_file_path = os.path.join(subdir, "job.sh")
         with open(slurm_file_path, "w") as f:
-            f.write(JOB_TEMPLATE.render(NPROC=NPROC, NAME="test"))
+            f.write(JOB_TEMPLATE.render(NPROC=NPROC, NAME="test", module=module))
 
         #  add directories for heat, eq, anal, etc.
         for sub in charmm_sub_dirs:
@@ -108,7 +115,7 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
 
         slurm_file_path = os.path.join(gas_phase_dir, "job.sh")
         with open(slurm_file_path, "w") as f:
-            f.write(JOB_TEMPLATE.render(NPROC=1, NAME="gas"))
+            f.write(JOB_TEMPLATE.render(NPROC=1, NAME="gas", module=module))
 
         gas_phase_chm_file = os.path.join(gas_phase_dir, "job.inp")
         with open(gas_phase_chm_file, "w") as f:
@@ -192,6 +199,7 @@ if __name__ == "__main__":
     parser.add_argument('-e2', '--e2', help='e2', required=True)
     parser.add_argument('-e3', '--e3', help='e3', required=True)
     parser.add_argument('-e4', '--e4', help='e4', required=True)
+    parser.add_argument('-c', '--c', help="cluster", default="pc-beethoven")
     args = vars(parser.parse_args())
 
     arguments = sys.argv
@@ -203,18 +211,19 @@ if __name__ == "__main__":
     e2 = args["e2"]
     e3 = args["e3"]
     e4 = args["e4"]
+    cluster = args["c"]
 
     e_scale = [float(_) for _ in [e1, e2, e3, e4]]
 
     if dcm == "charmm":
         print("generating standard CHARMM input")
-        make_directories(path, input_path, temperatures, scale, e_scale)
+        make_directories(path, input_path, temperatures, scale, e_scale, cluster=cluster)
     elif dcm == "fmdcm":
         print("generating fMDCM input")
-        make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True)
+        make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True, cluster=cluster)
     elif dcm == "mdcm":
         print("generating MDCM input")
-        make_directories(path, input_path, temperatures, scale, e_scale, mdcm=True)
+        make_directories(path, input_path, temperatures, scale, e_scale, mdcm=True, cluster=cluster)
     else:
         print("incorrect input.")
         sys.exit(1)

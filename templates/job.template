@@ -12,7 +12,8 @@ nproc={{NPROC}}
 c_w_dir=$PWD
 cd $c_w_dir
 
-module load charmm/c45a1-gcc9.2.0-ompi4.0.2
+#module load charmm/c45a1-gcc9.2.0-ompi4.0.2
+{{ module }}
 CHARMM=~/dev-release-dcm/build/cmake/charmm
 
 mpirun -np $nproc $CHARMM < job.inp > job.out
