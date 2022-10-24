@@ -3,7 +3,7 @@
 !  loaded from sim1.template
 FASTER ON
 ! Turning off SHAKE
-!SHAKE BONH TOL 1.0E-8
+SHAKE BONH TOL 1.0E-8
 
 !================================================================
 !non bonded cut-offs
