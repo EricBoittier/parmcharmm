@@ -42,7 +42,7 @@ OPEN WRITE UNIT 31 CARD NAME @dataheq/md_heq.res      ! Restart file
 OPEN WRITE UNIT 32 FILE NAME @dataheq/md_heq.dcd      ! Coordinates file
 
 
-DYNA VVER start timestep 0.0005 nstep {{NSTEP1}}  -
+DYNA VVER start timestep 0.001 nstep {{NSTEP1}}  -
      nprint 1000 iprfrq 1000 ntrfrq 1000 -
      iunread -1 iunwri 31 iuncrd 32 iunvel -1 kunit -1 -
      nsavc 1000 nsavv 0 -
@@ -68,7 +68,7 @@ OPEN WRITE UNIT 31 CARD NAME @dataeq/md_eq1.res        ! Restart file
 OPEN WRITE UNIT 32 FILE NAME @dataeq/md_eq1.dcd        ! Coordinates file
 
 
-DYNA VVER restart timestep 0.0005 nstep {{NSTEP2}} -
+DYNA VVER restart timestep 0.001 nstep {{NSTEP2}} -
      nprint 1000 iprfrq 1000 ntrfrq 1000 -
      iunread 30 iunwri 31 iuncrd 32 iunvel -1 kunit -1 -
      nsavc 1000 nsavv 0 -
