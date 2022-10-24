@@ -175,7 +175,7 @@ def make_charm_input_gasphase(temperature, basepath, inputpath, scale, escale, f
     if mdcm:
         output += DCM_TEMPLATE_STR
     # simulation
-    output += SIM2_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2 * 2)
+    output += SIM2_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
 
     return output
 

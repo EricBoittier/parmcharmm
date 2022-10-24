@@ -35,6 +35,12 @@ WRITE COOR PDB NAME @datamin/int.pdb
 * PDB
 *
 
+
+SCALAR MASS STAT
+CALC PMASS = INT ( ?STOT  /  50.0 )
+CALC TMASS = @PMASS * 10
+
+
 !================================================================
 ! Heat the system
 !================================================================
@@ -42,7 +48,7 @@ OPEN WRITE UNIT 31 CARD NAME @dataheq/md_heq.res      ! Restart file
 OPEN WRITE UNIT 32 FILE NAME @dataheq/md_heq.dcd      ! Coordinates file
 
 dyna cpt start nstep {{NSTEP1}} timestep 0.0005     -
-    pcons pint pref 1.0 pmass 3000.0 pgamma 25. -
+    pcons pint pref 1.0 pmass @PMASS pgamma 25. -
     INBFRQ -1 IMGFRQ -1                        -
     nprint 100 iprfrq 5000 ihtfrq 1000 ieqfrq 1000 ntrfrq 1000 -
     firstt  98.15 finalt {{TEMP}} teminc 10.0  tbath {{TEMP}} -
@@ -68,8 +74,8 @@ OPEN WRITE UNIT 31 CARD NAME @dataeq/md_eq1.res        ! Restart file
 OPEN WRITE UNIT 32 FILE NAME @dataeq/md_eq1.dcd        ! Coordinates file
 
 dyna cpt rest nstep {{NSTEP2}} timestep 0.0005  -
-    pcons pref 1.0 pmass 3000.0 pgamma 5.0 -
-    hoover reft {{TEMP}} tmass 10000.0 -
+    pcons pref 1.0 pmass @PMASS pgamma 5.0 -
+    hoover reft {{TEMP}} tmass @TMASS -
     INBFRQ -1 IMGFRQ -1                        -
     nprint 100 iprfrq 5000 ihtfrq 0 ieqfrq 0 ntrfrq 5000 -
     firstt {{TEMP}} finalt {{TEMP}} teminc 10.0 tstruct {{TEMP}}  tbath {{TEMP}}  -

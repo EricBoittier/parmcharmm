@@ -1,5 +1,16 @@
-python main.py /data/boittier/param/methanol/fmdcm/r2.1 /data/boittier/param/methanol/input 1.01 fmdcm
-python main.py /data/boittier/param/methanol/fmdcm/r2.2 /data/boittier/param/methanol/input 1.02 fmdcm
-python main.py /data/boittier/param/methanol/fmdcm/r2.3 /data/boittier/param/methanol/input 0.99 fmdcm
-python main.py /data/boittier/param/methanol/fmdcm/r2.4 /data/boittier/param/methanol/input 0.98 fmdcm
-
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.0.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.3 -e2 1.0 -e3 1.0 -e4 1.0
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.0.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.0 -e2 1.3 -e3 1.0 -e4 1.0
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.1.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.0 -e2 1.3 -e3 1.25 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.1.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.3 -e2 1.0 -e3 1.25 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.2.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.3 -e2 1.25 -e3 1.4 -e4 1.1
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.2.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.0 -e2 1.25 -e3 1.4 -e4 1.2
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.3.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.0 -e2 1.25 -e3 1.25 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.3.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.3 -e2 1.25 -e3 1.25 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.4.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.25 -e2 1.0 -e3 1.0 -e4 1.0
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.4.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.25 -e2 1.3 -e3 1.0 -e4 1.0
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.5.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.45 -e2 1.0 -e3 1.25 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.5.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.25 -e2 1.3 -e3 1.25 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.6.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.25 -e2 1.45 -e3 1.0 -e4 1.0
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.6.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.25 -e2 1.45 -e3 1.0 -e4 1.4
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.7.0 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.01 -e1 1.45 -e2 1.25 -e3 1.45 -e4 1.25
+python main.py -p_out /data/boittier/param/methanol_h/fmdcm/r2.7.1 -p_in /data/boittier/param/methanol/input -v fmdcm -s 1.02 -e1 1.25 -e2 1.25 -e3 1.25 -e4 1.45
