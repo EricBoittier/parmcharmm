@@ -39,6 +39,8 @@ WRITE COOR PDB NAME @datamin/int.pdb
 SCALAR MASS STAT
 CALC PMASS = INT ( ?STOT  /  50.0 )
 CALC TMASS = @PMASS * 10
+CALC PMASS = @PMASS * 10
+
 
 
 !================================================================
