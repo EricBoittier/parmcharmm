@@ -2,7 +2,7 @@
 #SBATCH --job-name={{NAME}}
 #SBATCH --nodes=1
 #SBATCH --ntasks={{NPROC}}
-##SBATCH --partition=long
+#SBATCH --partition=long
 #SBATCH --mem-per-cpu=2200
 
 hostname
