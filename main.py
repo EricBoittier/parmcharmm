@@ -45,6 +45,9 @@ SIM2_TEMPLATE = jinja2.Template(SIM2_TEMPLATE_STR, undefined=StrictUndefined)
 
 JOB_TEMPLATE_STR = open(os.path.join("templates", "job.template")).read()
 JOB_TEMPLATE = jinja2.Template(JOB_TEMPLATE_STR, undefined=StrictUndefined)
+JOB2_TEMPLATE_STR = open(os.path.join("templates", "job2.template")).read()
+JOB2_TEMPLATE = jinja2.Template(JOB2_TEMPLATE_STR, undefined=StrictUndefined)
+
 ANALYSIS_TEMPLATE_STR = open(os.path.join("templates", "analysis.template")).read()
 ANALYSIS_TEMPLATE = jinja2.Template(ANALYSIS_TEMPLATE_STR, undefined=StrictUndefined)
 
@@ -115,7 +118,7 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
 
         slurm_file_path = os.path.join(gas_phase_dir, "job.sh")
         with open(slurm_file_path, "w") as f:
-            f.write(JOB_TEMPLATE.render(NPROC=1, NAME="gas", module=module))
+            f.write(JOB2_TEMPLATE.render(NPROC=1, NAME="gas", module=module))
 
         gas_phase_chm_file = os.path.join(gas_phase_dir, "job.inp")
         with open(gas_phase_chm_file, "w") as f:

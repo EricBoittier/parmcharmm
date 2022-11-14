@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --job-name={{NAME}}
+#SBATCH --nodes=1
+#SBATCH --ntasks={{NPROC}}
+#SBATCH --partition=short
+#SBATCH --mem-per-cpu=2200
+#
+
+hostname
+
+nproc={{NPROC}}
+
+c_w_dir=$PWD
+cd $c_w_dir
+
+#module load charmm/c45a1-gcc9.2.0-ompi4.0.2
+{{ module }}
+CHARMM=~/dev-release-dcm/build/cmake/charmm
+
+for i in {1..5}; do
+mpirun -np $nproc $CHARMM < job.inp > job$i.out
+# report values
+grep "DYNA PRESS>" job$i.out > pressure$i.raw
+grep "DYNA>" job$i.out > dyna$i.raw
+done
+
