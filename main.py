@@ -5,9 +5,10 @@ from pathlib import Path
 import sys
 
 # temperatures = [240.0, 260.0, 280.0, 290.0, 300.0, 310.0, 320.0, 340.0]
-temperatures = [250.0, 270.0, 298.15, 331.0]
+#temperatures = [250.0, 270.0, 298.15, 331.0]
+temperatures = [298.15, 331.0]
 NSTEP1 = 100000
-NSTEP2 = 3000000
+NSTEP2 = 100000
 
 #  methanol
 LJ_dict = {"OG311": [-0.1921, 1.7650],
