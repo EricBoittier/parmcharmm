@@ -8,7 +8,7 @@ import sys
 #temperatures = [250.0, 270.0, 298.15, 331.0]
 temperatures = [298.15, 331.0]
 NSTEP1 = 100000
-NSTEP2 = 100000
+NSTEP2 = 250000
 
 #  methanol
 LJ_dict = {"OG311": [-0.1921, 1.7650],
