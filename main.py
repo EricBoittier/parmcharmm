@@ -233,7 +233,7 @@ if __name__ == "__main__":
         make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True, cluster=cluster)
     elif dcm == "kernel":
         print("generating kernel input")
-        make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True, cluster=cluster)
+        make_directories(path, input_path, temperatures, scale, e_scale, kernel=True, cluster=cluster)
     elif dcm == "mdcm":
         print("generating MDCM input")
         make_directories(path, input_path, temperatures, scale, e_scale, mdcm=True, cluster=cluster)
