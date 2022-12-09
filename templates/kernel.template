@@ -1,0 +1,8 @@
+
+!
+! f-MDCM Kernel
+!
+open unit 12 card read name @input/methanol.kern
+open unit 10 card read name @input/10charges.dcm
+! WITH KERN
+DCM KERN 12 IUDCM 10 TSHIFT !XYZ 15

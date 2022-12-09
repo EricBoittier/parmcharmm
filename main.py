@@ -38,6 +38,8 @@ DCM_TEMPLATE_STR = open(os.path.join("templates", "mdcm.template")).read()
 DCM_TEMPLATE = jinja2.Template(DCM_TEMPLATE_STR, undefined=StrictUndefined)
 FDCM_TEMPLATE_STR = open(os.path.join("templates", "fdcm.template")).read()
 FDCM_TEMPLATE = jinja2.Template(FDCM_TEMPLATE_STR, undefined=StrictUndefined)
+KERN_TEMPLATE_STR = open(os.path.join("templates", "kernel.template")).read()
+KERN_TEMPLATE = jinja2.Template(KERN_TEMPLATE_STR, undefined=StrictUndefined)
 
 SIM1_TEMPLATE_STR = open(os.path.join("templates", "sim1.template")).read()
 SIM1_TEMPLATE = jinja2.Template(SIM1_TEMPLATE_STR, undefined=StrictUndefined)
@@ -89,6 +91,8 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
         module = "module load charmm/c45a1-gcc9.2.0-ompi4.0.2"
     elif cluster == "pc-nccr-cluster":
         module = "module load charmm/gfortran-openmpi-1.10.4-hfi"
+    elif cluster == "pc-bach":
+        module = "module load gcc/gcc-12.2.0-cmake-3.25.1-openmpi-4.1.4"
 
     # runs
     safe_mkdir(runs_dir)
@@ -153,7 +157,7 @@ def format_topology(scale, TEMPLATE, e_scale):
     return _
 
 
-def make_charmm_input(temperature, basepath, inputpath, scale, escale, fmdcm=False, mdcm=False):
+def make_charmm_input(temperature, basepath, inputpath, scale, escale, fmdcm=False, mdcm=False, kernel=False):
     output = ""
     # header
     output += HEADER_TEMPLATE.render(BASEPATH=basepath, INPUTPATH=inputpath)
@@ -166,6 +170,8 @@ def make_charmm_input(temperature, basepath, inputpath, scale, escale, fmdcm=Fal
         output += FDCM_TEMPLATE_STR
     if mdcm:
         output += DCM_TEMPLATE_STR
+    if kernel:
+        output += KERN_TEMPLATE_STR
     # simulation
     output += SIM1_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
     output += ANALYSIS_TEMPLATE_STR
@@ -224,6 +230,9 @@ if __name__ == "__main__":
         make_directories(path, input_path, temperatures, scale, e_scale, cluster=cluster)
     elif dcm == "fmdcm":
         print("generating fMDCM input")
+        make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True, cluster=cluster)
+    elif dcm == "kernel":
+        print("generating kernel input")
         make_directories(path, input_path, temperatures, scale, e_scale, fmdcm=True, cluster=cluster)
     elif dcm == "mdcm":
         print("generating MDCM input")
