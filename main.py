@@ -72,7 +72,7 @@ def safe_mkdir(path):
 """
 
 
-def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False, cluster="pc-beethoven"):
+def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False, kernel=False, cluster="pc-beethoven"):
     if scale is None:
         scale = 1
 
@@ -104,7 +104,7 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
         #  charmm input
         charm_file_path = os.path.join(subdir, "job.inp")
         with open(charm_file_path, "w") as f:
-            f.write(make_charmm_input(temperature, subdir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm))
+            f.write(make_charmm_input(temperature, subdir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm, kernel=kernel))
         f.close()
 
         #  sbatch script
@@ -127,7 +127,7 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
 
         gas_phase_chm_file = os.path.join(gas_phase_dir, "job.inp")
         with open(gas_phase_chm_file, "w") as f:
-            f.write(make_charm_input_gasphase(temperature, gas_phase_dir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm))
+            f.write(make_charm_input_gasphase(temperature, gas_phase_dir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm, kernel=kernel))
 
         for sub in charmm_sub_dirs:
             subdirpath = os.path.join(gas_phase_dir, sub)
@@ -179,7 +179,7 @@ def make_charmm_input(temperature, basepath, inputpath, scale, escale, fmdcm=Fal
     return output
 
 
-def make_charm_input_gasphase(temperature, basepath, inputpath, scale, escale, fmdcm=False, mdcm=False):
+def make_charm_input_gasphase(temperature, basepath, inputpath, scale, escale, fmdcm=False, mdcm=False, kernel=False):
     output = ""
     # header
     output += HEADER_TEMPLATE.render(BASEPATH=basepath, INPUTPATH=inputpath)
@@ -191,6 +191,8 @@ def make_charm_input_gasphase(temperature, basepath, inputpath, scale, escale, f
         output += FDCM_TEMPLATE_STR
     if mdcm:
         output += DCM_TEMPLATE_STR
+    if kernel:
+        output += KERN_TEMPLATE_STR
     # simulation
     output += SIM2_TEMPLATE.render(TEMP=temperature, NSTEP1=NSTEP1, NSTEP2=NSTEP2)
 
