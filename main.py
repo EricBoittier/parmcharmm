@@ -78,7 +78,7 @@ def safe_mkdir(path):
 """
 
 
-def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False, kernel=False,
+def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=48, fmdcm=False, mdcm=False, kernel=False,
                      cluster="pc-beethoven"):
     if scale is None:
         scale = 1
