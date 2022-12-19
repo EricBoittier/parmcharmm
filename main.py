@@ -5,10 +5,10 @@ from pathlib import Path
 import sys
 
 # temperatures = [240.0, 260.0, 280.0, 290.0, 300.0, 310.0, 320.0, 340.0]
-# temperatures = [250.0, 270.0, 298.15, 331.0]
-temperatures = [298.15, 331.0]
-NSTEP1 = 100000
-NSTEP2 = 250000
+temperatures = [250.0, 270.0, 298.15, 331.0]
+#temperatures = [298.15, 331.0]
+NSTEP1 = 200000
+NSTEP2 = 3000000
 
 #  methanol
 LJ_dict = {"OG311": [-0.1921, 1.7650],
@@ -161,11 +161,11 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
     with open(os.path.join(runs_dir, "submit.sh"), "w") as f:
         job_str = ALL_JOBS_TEMPLATE.render(NAME=KEY)
         for job in slurm_paths:
-            job_str.write("cd {} \n".format(os.path.join(BASE, job)))
-            job_str.write("sbatch {}\n".format(os.path.join(BASE, job, "job.sh")))
-            job_str.write(f"cd {BASE}\n")
+            job_str += "cd {} \n".format(os.path.join(BASE, job))
+            job_str += "sbatch {}\n".format(os.path.join(BASE, job, "job.sh"))
+            job_str += f"cd {BASE}\n"
 
-        job_str.write("sbatch analysis.sh\n")
+        job_str += "sbatch analysis.sh\n"
         f.write(job_str)
 
 
