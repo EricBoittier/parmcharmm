@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 # temperatures = [240.0, 260.0, 280.0, 290.0, 300.0, 310.0, 320.0, 340.0]
-#temperatures = [250.0, 270.0, 298.15, 331.0]
+# temperatures = [250.0, 270.0, 298.15, 331.0]
 temperatures = [298.15, 331.0]
 NSTEP1 = 100000
 NSTEP2 = 250000
@@ -54,6 +54,12 @@ JOB2_TEMPLATE = jinja2.Template(JOB2_TEMPLATE_STR, undefined=StrictUndefined)
 ANALYSIS_TEMPLATE_STR = open(os.path.join("templates", "analysis.template")).read()
 ANALYSIS_TEMPLATE = jinja2.Template(ANALYSIS_TEMPLATE_STR, undefined=StrictUndefined)
 
+ALL_JOBS_TEMPLATE_STR = open(os.path.join("templates", "all_jobs.template")).read()
+ALL_JOBS_TEMPLATE = jinja2.Template(ALL_JOBS_TEMPLATE_STR, undefined=StrictUndefined)
+
+ANALYSIS_JOB_TEMPLATE_STR = open(os.path.join("templates", "analysis_job.template")).read()
+ANALYSIS_JOB_TEMPLATE = jinja2.Template(ANALYSIS_JOB_TEMPLATE_STR, undefined=StrictUndefined)
+
 
 def safe_mkdir(path):
     Path(path).mkdir(parents=True, exist_ok=True)
@@ -72,7 +78,8 @@ def safe_mkdir(path):
 """
 
 
-def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False, kernel=False, cluster="pc-beethoven"):
+def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, mdcm=False, kernel=False,
+                     cluster="pc-beethoven"):
     if scale is None:
         scale = 1
 
@@ -80,11 +87,12 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
         print("Only fMDCM or MDCM can be loaded at one time")
         sys.exit(1)
 
-    # input_dir = os.path.join(BASE, "input")
     runs_dir = os.path.join(BASE)
+
+    KEY = BASE.split("/")[-1]
+
     # base directory
     safe_mkdir(BASE)
-
 
     module = ""
     if cluster == "pc-beethoven":
@@ -98,19 +106,25 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
     safe_mkdir(runs_dir)
     #  make subdirectories inside run
     t_paths = temperature_filenames(TEMPS)
+
+    slurm_paths = []
+
     for temperature, t_path in zip(TEMPS, t_paths):
         subdir = os.path.join(runs_dir, t_path)
         safe_mkdir(subdir)
         #  charmm input
         charm_file_path = os.path.join(subdir, "job.inp")
         with open(charm_file_path, "w") as f:
-            f.write(make_charmm_input(temperature, subdir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm, kernel=kernel))
+            f.write(make_charmm_input(temperature, subdir, INPUT, scale, escale,
+                                      fmdcm=fmdcm, mdcm=mdcm, kernel=kernel))
         f.close()
 
         #  sbatch script
         slurm_file_path = os.path.join(subdir, "job.sh")
         with open(slurm_file_path, "w") as f:
-            f.write(JOB_TEMPLATE.render(NPROC=NPROC, NAME="test", module=module))
+            f.write(JOB_TEMPLATE.render(NPROC=NPROC, NAME=KEY, module=module))
+
+        slurm_paths.append(subdir)
 
         #  add directories for heat, eq, anal, etc.
         for sub in charmm_sub_dirs:
@@ -123,15 +137,36 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=16, fmdcm=False, m
 
         slurm_file_path = os.path.join(gas_phase_dir, "job.sh")
         with open(slurm_file_path, "w") as f:
-            f.write(JOB2_TEMPLATE.render(NPROC=1, NAME="gas", module=module))
+            f.write(JOB2_TEMPLATE.render(NPROC=1, NAME=KEY, module=module))
+        slurm_paths.append(gas_phase_dir)
 
         gas_phase_chm_file = os.path.join(gas_phase_dir, "job.inp")
         with open(gas_phase_chm_file, "w") as f:
-            f.write(make_charm_input_gasphase(temperature, gas_phase_dir, INPUT, scale, escale, fmdcm=fmdcm, mdcm=mdcm, kernel=kernel))
+            f.write(make_charm_input_gasphase(temperature,
+                                              gas_phase_dir,
+                                              INPUT,
+                                              scale,
+                                              escale,
+                                              fmdcm=fmdcm, mdcm=mdcm, kernel=kernel))
 
         for sub in charmm_sub_dirs:
             subdirpath = os.path.join(gas_phase_dir, sub)
             safe_mkdir(subdirpath)
+
+    #  write the analysis job
+    with open(os.path.join(runs_dir, "analysis.sh"), "w") as f:
+        f.write(ANALYSIS_JOB_TEMPLATE.render(NAME=KEY, PATH=runs_dir))
+
+    #  write the submission job
+    with open(os.path.join(runs_dir, "submit.sh"), "w") as f:
+        job_str = ALL_JOBS_TEMPLATE.render(NAME=KEY)
+        for job in slurm_paths:
+            job_str.write("cd {} \n".format(os.path.join(BASE, job)))
+            job_str.write("sbatch {}\n".format(os.path.join(BASE, job, "job.sh")))
+            job_str.write(f"cd {BASE}\n")
+
+        job_str.write("sbatch analysis.sh\n")
+        f.write(job_str)
 
 
 def format_topology(scale, TEMPLATE, e_scale):
@@ -205,8 +240,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Fiddle with the parameters until they give you what you want...')
     parser.add_argument('-v', '--v', help='version of the code ("charmm", "fmdcm", "mdcm")', required=True)
     parser.add_argument('-s', '--s', help='scale separation', required=True)
-    parser.add_argument('-p_in', '--p_in', help='scale separation', required=True)
-    parser.add_argument('-p_out', '--p_out', help='scale separation', required=True)
+    parser.add_argument('-p_in', '--p_in', help='input path', required=True)
+    parser.add_argument('-p_out', '--p_out', help='output path', required=True)
     parser.add_argument('-e1', '--e1', help='e1', required=True)
     parser.add_argument('-e2', '--e2', help='e2', required=True)
     parser.add_argument('-e3', '--e3', help='e3', required=True)
