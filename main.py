@@ -90,6 +90,14 @@ def make_directories(BASE, INPUT, TEMPS, scale, escale, NPROC=48, fmdcm=False, m
     runs_dir = os.path.join(BASE)
 
     KEY = BASE.split("/")[-1]
+    if fmdcm:
+        KEY = "f"+KEY
+    elif mdcm:
+        KEY = "m"+KEY
+    elif kernel:
+        KEY = "k"+KEY
+    else:
+        KEY = "c"+KEY
 
     # base directory
     safe_mkdir(BASE)

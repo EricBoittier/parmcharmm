@@ -10,4 +10,4 @@ source ~/.bashrc
 
 conda activate p
 
-python cli -p {{PATH}} -k {{NAME}}
+python /cluster/home/boittier/parametrization/cli.py -p {{PATH}} -l {{NAME}}

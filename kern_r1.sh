@@ -1,0 +1,10 @@
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r3.0.0 -p_in /cluster/home/boittier/input -v kernel -s 1.01 -e1 1.0 -e2 1.0 -e3 1.0 -e4 1.0
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r3.0.1 -p_in /cluster/home/boittier/input -v kernel -s 1.01 -e1 1.0 -e2 1.0 -e3 1.0 -e4 1.0
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r4.0.0 -p_in /cluster/home/boittier/input -v kernel -s 1.01 -e1 1.01 -e2 1.01 -e3 1.01 -e4 1.01
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r4.0.1 -p_in /cluster/home/boittier/input -v kernel -s 1.01 -e1 1.01 -e2 1.01 -e3 1.01 -e4 1.01
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r5.0.0 -p_in /cluster/home/boittier/input -v kernel -s 1.02 -e1 0.99 -e2 0.99 -e3 1.01 -e4 1.01
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r5.0.1 -p_in /cluster/home/boittier/input -v kernel -s 1.02 -e1 0.99 -e2 0.99 -e3 1.01 -e4 1.01
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r6.0.0 -p_in /cluster/home/boittier/input -v kernel -s 1.02 -e1 0.99 -e2 0.99 -e3 1.01 -e4 1.01
+#python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r6.0.1 -p_in /cluster/home/boittier/input -v kernel -s 1.02 -e1 0.99 -e2 0.99 -e3 1.01 -e4 1.01
+python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r7.0.0 -p_in /cluster/home/boittier/input -v kernel -s 1.01 -e1 0.98 -e2 0.98 -e3 1.02 -e4 1.02
+python main.py -c pc-bach -p_out /cluster/home/boittier/param/methanol/kern/r7.0.1 -p_in /cluster/home/boittier/input -v kernel -s 1.01 -e1 0.98 -e2 0.98 -e3 1.02 -e4 1.02
