@@ -8,6 +8,8 @@
 
 source ~/.bashrc
 
+conda init bash
+
 conda activate p
 
 python /cluster/home/boittier/parametrization/cli.py -p {{PATH}} -l {{NAME}}
